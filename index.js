@@ -44,6 +44,20 @@ async function run() {
             
         })
 
+        // get api to get addedjobs data
+        
+        app.get("/api/v1/getAddedJobsData",async(req,res)=>{
+            // console.log(req.query.email);
+            // let query = {}
+            // if(req?.query?.email){
+            //     query = {categories: req?.query?.email}
+            // }
+            const cursor = jobscollection.find()
+            const result = await cursor.toArray()
+            res.send(result)
+
+        })
+
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
         // Send a ping to confirm a successful connection
