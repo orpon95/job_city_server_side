@@ -85,6 +85,17 @@ async function run() {
 
         })
 
+        // patch api to sent data to allbidded collection
+        app.patch("/api/v1/employ/getAllBiddedJobs/:id" , async(req,res)=>{
+
+            const id = req.params.id;
+            console.log(id);
+            const filter = {_id: new ObjectId(id)}
+            // const options = {upsert:true}
+            // const updatedProduct = req.body
+            res.send(id)
+        })
+
 
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
