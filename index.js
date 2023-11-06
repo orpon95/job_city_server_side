@@ -32,6 +32,8 @@ async function run() {
         // database and collection create
         const database = client.db("jobDB");
         const jobscollection = database.collection("added-jobs");
+        const allBiddedJobs = database.collection("All-bidded-jobs");
+
         
 
         // [pst api for add product]
@@ -57,6 +59,32 @@ async function run() {
             res.send(result)
 
         })
+
+
+        // post api for adding bidded jobs
+
+        app.post("/api/v1/employ/allBiddedJobs", async (req, res) => {
+            const BiddedJobs = req.body;
+            const result = await allBiddedJobs.insertOne(BiddedJobs)
+            res.send(result)
+            
+            
+        })
+
+        // get api to get all bidded data
+        
+        app.get("/api/v1/employ/getAllBiddedJobs",async(req,res)=>{
+            // console.log(req.query.email);
+            // let query = {}
+            // if(req?.query?.email){
+            //     query = {categories: req?.query?.email}
+            // }
+            const cursor = allBiddedJobs.find()
+            const result = await cursor.toArray()
+            res.send(result)
+
+        })
+
 
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
