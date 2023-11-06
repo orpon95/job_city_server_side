@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 require('dotenv').config()
 const app = express();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
 
@@ -85,22 +85,46 @@ async function run() {
 
         })
 
+        // patch api2 to sent data to allbidded collection
+        app.patch("/api/v2/employ/getAllBiddedJobs/:id" , async(req,res)=>{
+
+            const id = req.params.id;
+            // console.log(id);
+            const filter = {_id: new ObjectId(id)}
+            // const options = {upsert:true}
+            const updatedData = req.body
+            const setUpdatedData = {
+                $set:{
+                    complete_status : updatedData.status
+                }
+            }
+            const result = await allBiddedJobs.updateOne(filter,setUpdatedData)
+            res.send(result)
+            // console.log(updatedData);
+        })
         // patch api to sent data to allbidded collection
         app.patch("/api/v1/employ/getAllBiddedJobs/:id" , async(req,res)=>{
 
             const id = req.params.id;
-            console.log(id);
+            // console.log(id);
             const filter = {_id: new ObjectId(id)}
             // const options = {upsert:true}
-            // const updatedProduct = req.body
-            res.send(id)
+            const updatedData = req.body
+            const setUpdatedData = {
+                $set:{
+                    status : updatedData.status
+                }
+            }
+            const result = await allBiddedJobs.updateOne(filter,setUpdatedData)
+            res.send(result)
+            // console.log(updatedData);
         })
 
 
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+         client.connect();
         // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
+         client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
