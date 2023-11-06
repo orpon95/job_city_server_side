@@ -126,7 +126,7 @@ async function run() {
             const filter = { _id: new ObjectId(id) }
             const options = { upsert: true }
             const updatedProduct = req.body
-            console.log(id,updatedProduct);
+            console.log(id, updatedProduct);
 
             const setUpdatedProduct = {
                 $set: {
@@ -137,10 +137,19 @@ async function run() {
                     min_price: updatedProduct?.min_price,
                     max_price: updatedProduct?.max_price,
                     short_description: updatedProduct?.short_description,
-                    
+
                 }
             }
             const result = await jobscollection.updateOne(filter, setUpdatedProduct, options)
+            res.send(result)
+        })
+
+        // delte api for delete card from posted job
+        app.delete("/api/v1/employ/deleteJobsCard/:id", async (req, res) => {
+            const id = req.params.id
+            // console.log("pls delte ", id)
+            const query = { _id: new  ObjectId(id) }
+            const result = await jobscollection.deleteOne(query)
             res.send(result)
         })
 
