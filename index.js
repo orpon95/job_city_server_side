@@ -34,7 +34,7 @@ async function run() {
         const jobscollection = database.collection("added-jobs");
         const allBiddedJobs = database.collection("All-bidded-jobs");
 
-        
+
 
         // [pst api for add product]
 
@@ -42,13 +42,13 @@ async function run() {
             const addedjobs = req.body;
             const result = await jobscollection.insertOne(addedjobs)
             res.send(result)
-            
-            
+
+
         })
 
         // get api to get addedjobs data
-        
-        app.get("/api/v1/getAddedJobsData",async(req,res)=>{
+
+        app.get("/api/v1/getAddedJobsData", async (req, res) => {
             // console.log(req.query.email);
             // let query = {}
             // if(req?.query?.email){
@@ -67,13 +67,13 @@ async function run() {
             const BiddedJobs = req.body;
             const result = await allBiddedJobs.insertOne(BiddedJobs)
             res.send(result)
-            
-            
+
+
         })
 
         // get api to get all bidded data
-        
-        app.get("/api/v1/employ/getAllBiddedJobs",async(req,res)=>{
+
+        app.get("/api/v1/employ/getAllBiddedJobs", async (req, res) => {
             // console.log(req.query.email);
             // let query = {}
             // if(req?.query?.email){
@@ -86,45 +86,69 @@ async function run() {
         })
 
         // patch api2 to sent data to allbidded collection
-        app.patch("/api/v2/employ/getAllBiddedJobs/:id" , async(req,res)=>{
+        app.patch("/api/v2/employ/getAllBiddedJobs/:id", async (req, res) => {
 
             const id = req.params.id;
             // console.log(id);
-            const filter = {_id: new ObjectId(id)}
+            const filter = { _id: new ObjectId(id) }
             // const options = {upsert:true}
             const updatedData = req.body
             const setUpdatedData = {
-                $set:{
-                    complete_status : updatedData.status
+                $set: {
+                    complete_status: updatedData.status
                 }
             }
-            const result = await allBiddedJobs.updateOne(filter,setUpdatedData)
+            const result = await allBiddedJobs.updateOne(filter, setUpdatedData)
             res.send(result)
             // console.log(updatedData);
         })
         // patch api to sent data to allbidded collection
-        app.patch("/api/v1/employ/getAllBiddedJobs/:id" , async(req,res)=>{
+        app.patch("/api/v1/employ/getAllBiddedJobs/:id", async (req, res) => {
 
             const id = req.params.id;
             // console.log(id);
-            const filter = {_id: new ObjectId(id)}
+            const filter = { _id: new ObjectId(id) }
             // const options = {upsert:true}
             const updatedData = req.body
             const setUpdatedData = {
-                $set:{
-                    status : updatedData.status
+                $set: {
+                    status: updatedData.status
                 }
             }
-            const result = await allBiddedJobs.updateOne(filter,setUpdatedData)
+            const result = await allBiddedJobs.updateOne(filter, setUpdatedData)
             res.send(result)
             // console.log(updatedData);
         })
 
+        // put api to update alljobs data
+        app.put("/api/v1/employ/allJobsUpdate/:id", async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            const options = { upsert: true }
+            const updatedProduct = req.body
+            console.log(id,updatedProduct);
+
+            const setUpdatedProduct = {
+                $set: {
+                    email: updatedProduct?.email,
+                    job_title: updatedProduct?.job_title,
+                    deadline: updatedProduct?.deadline,
+                    categories: updatedProduct?.categories,
+                    min_price: updatedProduct?.min_price,
+                    max_price: updatedProduct?.max_price,
+                    short_description: updatedProduct?.short_description,
+                    
+                }
+            }
+            const result = await jobscollection.updateOne(filter, setUpdatedProduct, options)
+            res.send(result)
+        })
+
 
         // Connect the client to the server	(optional starting in v4.7)
-         client.connect();
+        client.connect();
         // Send a ping to confirm a successful connection
-         client.db("admin").command({ ping: 1 });
+        client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
