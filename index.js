@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 require('dotenv').config()
+const cookieParser = require('cookie-parser')
+const jwt = require("jsonwebtoken")
 const app = express();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
@@ -8,9 +10,13 @@ const port = process.env.PORT || 5000;
 
 
 // middeleware
-app.use(cors());
+app.use(cors({
+    origin:["http://localhost:5173"],
+    credentials:true
+}));
 app.use(express.json());
-console.log("password", process.env.DB_PASS);
+app.use(cookieParser())
+
 
 // mongodb start
 
@@ -27,6 +33,24 @@ const client = new MongoClient(uri, {
     }
 });
 
+// middelewares
+const veryfyToken = async (req,res,next)=>{
+    const token = req?.cookies?.token
+    console.log("middeler",token);
+    if (!token){
+        return res.status(401).send({message:"not authorised user"})
+    }
+    jwt.verify(token,process.env.ACCESS_TOKEN_SECRET,(err,decoded)=>{
+        if(err){
+            return res.status(401).send({message:"unauthorized user"})
+        }
+        console.log("real decoded toke", decoded);
+        req.user = decoded
+        next()
+    })
+    
+}
+
 async function run() {
     try {
         // database and collection create
@@ -35,6 +59,27 @@ async function run() {
         const allBiddedJobs = database.collection("All-bidded-jobs");
 
 
+        // token api
+        app.post("/api/v1/jwt", async (req, res) => {
+            const user = req.body;
+            console.log(user);
+            // const result = await jobscollection.insertOne(addedjobs)
+            const token = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET, {expiresIn: "1h"})
+
+            res.cookie("token", token , {
+                httpOnly: true,
+                secure:false,
+                
+
+            })
+            
+            .send({success: true})
+
+
+        })
+
+
+    //    services api
 
         // [pst api for add product]
 
@@ -46,15 +91,34 @@ async function run() {
 
         })
 
-        // get api to get addedjobs data
+        // get api to get addedjobs to home page 
 
-        app.get("/api/v1/getAddedJobsData", async (req, res) => {
+        app.get("/api/v2/getAddedJobsData", async (req, res) => {
             // console.log(req.query.email);
-            // let query = {}
-            // if(req?.query?.email){
-            //     query = {categories: req?.query?.email}
+            let query = {}
+            if(req?.query?.email){
+                query = {email: req?.query?.email}
+            }
+            // console.log("tok tok",req.cookies.token);
+            const cursor = jobscollection.find(query)
+            const result = await cursor.toArray()
+            res.send(result)
+
+        })
+
+        // get api to get addedjobs to postedjob route data
+
+        app.get("/api/v1/getAddedJobsData",veryfyToken, async (req, res) => {
+            console.log(  "query email", req.query.email);
+            // if(req?.query?.email !== req?.user?.email){
+            //     return res.status(401).send({message:"forbidden access"})
             // }
-            const cursor = jobscollection.find()
+            let query = {}
+            if(req?.query?.email){
+                query = {email: req?.query?.email}
+            }
+            console.log("tok tok user",req.user);
+            const cursor = jobscollection.find(query)
             const result = await cursor.toArray()
             res.send(result)
 
