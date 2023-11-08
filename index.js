@@ -68,7 +68,26 @@ async function run() {
 
             res.cookie("token", token , {
                 httpOnly: true,
-                secure:false,
+                secure:true,
+                sameSite:"none",
+                maxAge:60*60*1000
+                
+
+            })
+            
+            .send({success: true})
+
+
+        })
+        // logoit api
+        app.post("/api/v1/jwt/logout", async (req, res) => {
+            const user = req.body;
+            console.log("logoyt",user);
+            // const result = await jobscollection.insertOne(addedjobs)
+            
+
+            res.clearCookie("token",  {
+               maxAge:0
                 
 
             })
@@ -109,7 +128,8 @@ async function run() {
         // get api to get addedjobs to postedjob route data
 
         app.get("/api/v1/getAddedJobsData",veryfyToken, async (req, res) => {
-            // console.log(  "query email", req.query.email);
+            console.log(  "query email", req.query.email);
+            console.log("token query", req?.user?.email);
             // if(req?.query?.email !== req?.user?.email){
             //     return res.status(401).send({message:"forbidden access"})
             // }
@@ -135,9 +155,9 @@ async function run() {
 
         })
 
-        // get api to get all bidded data by query
+        // get api to get all bidded data by query this
 
-        app.get("/api/v1/employ/getAllBiddedJobs", async (req, res) => {
+        app.get("/api/v1/employ/getAllBiddedJobs",veryfyToken, async (req, res) => {
             console.log("bijidde email",req.query?.email);
             let query = {}
             if(req?.query?.email){
@@ -148,15 +168,15 @@ async function run() {
             res.send(result)
 
         })
-        // get api to get all bidded data by all
+        // get api to get all bidded data by all this2
 
-        app.get("/api/v3/employ/getAllBiddedJobs", async (req, res) => {
+        app.get("/api/v3/employ/getAllBiddedJobs",veryfyToken, async (req, res) => {
             console.log("bijidde email",req.query?.email);
-            // let query = {}
-            // if(req?.query?.email){
-            //     query = {bidder_email: req?.query?.email}
-            // }
-            const cursor = allBiddedJobs.find()
+            let query = {}
+            if(req?.query?.email){
+                query = {Buyer_email: req?.query?.email}
+            }
+            const cursor = allBiddedJobs.find(query)
             const result = await cursor.toArray()
             res.send(result)
 
