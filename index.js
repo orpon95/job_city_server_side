@@ -36,7 +36,7 @@ const client = new MongoClient(uri, {
 // middelewares
 const veryfyToken = async (req,res,next)=>{
     const token = req?.cookies?.token
-    console.log("middeler",token);
+    // console.log("middeler",token);
     if (!token){
         return res.status(401).send({message:"not authorised user"})
     }
@@ -44,7 +44,7 @@ const veryfyToken = async (req,res,next)=>{
         if(err){
             return res.status(401).send({message:"unauthorized user"})
         }
-        console.log("real decoded toke", decoded);
+        // console.log("real decoded toke", decoded);
         req.user = decoded
         next()
     })
@@ -109,7 +109,7 @@ async function run() {
         // get api to get addedjobs to postedjob route data
 
         app.get("/api/v1/getAddedJobsData",veryfyToken, async (req, res) => {
-            console.log(  "query email", req.query.email);
+            // console.log(  "query email", req.query.email);
             // if(req?.query?.email !== req?.user?.email){
             //     return res.status(401).send({message:"forbidden access"})
             // }
@@ -135,13 +135,39 @@ async function run() {
 
         })
 
-        // get api to get all bidded data
+        // get api to get all bidded data by query
 
         app.get("/api/v1/employ/getAllBiddedJobs", async (req, res) => {
-            // console.log(req.query.email);
+            console.log("bijidde email",req.query?.email);
+            let query = {}
+            if(req?.query?.email){
+                query = {bidder_email: req?.query?.email}
+            }
+            const cursor = allBiddedJobs.find(query)
+            const result = await cursor.toArray()
+            res.send(result)
+
+        })
+        // get api to get all bidded data by all
+
+        app.get("/api/v3/employ/getAllBiddedJobs", async (req, res) => {
+            console.log("bijidde email",req.query?.email);
             // let query = {}
             // if(req?.query?.email){
-            //     query = {categories: req?.query?.email}
+            //     query = {bidder_email: req?.query?.email}
+            // }
+            const cursor = allBiddedJobs.find()
+            const result = await cursor.toArray()
+            res.send(result)
+
+        })
+        // get api to get all bidded data for bidder email and buyer email get
+
+        app.get("/api/v4/employ/getAllBiddedJobs", async (req, res) => {
+            console.log("bijidde email",req.query?.email);
+            // let query = {}
+            // if(req?.query?.email){
+            //     query = {bidder_email: req?.query?.email}
             // }
             const cursor = allBiddedJobs.find()
             const result = await cursor.toArray()
