@@ -163,13 +163,19 @@ async function run() {
         })
         // get api to get all bidded data for bidder email and buyer email get
 
-        app.get("/api/v4/employ/getAllBiddedJobs", async (req, res) => {
+        app.get("/api/v4/employ/getAlladdedJobs", async (req, res) => {
             console.log("bijidde email",req.query?.email);
             // let query = {}
             // if(req?.query?.email){
             //     query = {bidder_email: req?.query?.email}
             // }
-            const cursor = allBiddedJobs.find()
+            const projection ={
+                email: 1,
+                
+                
+
+            }
+            const cursor = jobscollection.find().project(projection)
             const result = await cursor.toArray()
             res.send(result)
 
