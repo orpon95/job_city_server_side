@@ -16,7 +16,8 @@ app.use(cors({
         // "http://localhost:5173",
         "https://job-city-b516d.web.app",
         "job-city-b516d.firebaseapp.com",
-        "https://job-city-b516d.firebaseapp.com"
+        "https://job-city-b516d.firebaseapp.com",
+        "https://654ccfa2ddff4238596ed626--gorgeous-blini-aab416.netlify.app/"
     ]
     ,
     credentials: true
