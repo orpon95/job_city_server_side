@@ -11,8 +11,15 @@ const port = process.env.PORT || 5000;
 
 // middeleware
 app.use(cors({
-    origin:["http://localhost:5173"],
-    credentials:true
+    origin: [
+
+        // "http://localhost:5173",
+        "https://job-city-b516d.web.app",
+        "job-city-b516d.firebaseapp.com",
+        "https://job-city-b516d.firebaseapp.com"
+    ]
+    ,
+    credentials: true
 }));
 app.use(express.json());
 app.use(cookieParser())
@@ -34,21 +41,21 @@ const client = new MongoClient(uri, {
 });
 
 // middelewares
-const veryfyToken = async (req,res,next)=>{
+const veryfyToken = async (req, res, next) => {
     const token = req?.cookies?.token
     // console.log("middeler",token);
-    if (!token){
-        return res.status(401).send({message:"not authorised user"})
+    if (!token) {
+        return res.status(401).send({ message: "not authorised user" })
     }
-    jwt.verify(token,process.env.ACCESS_TOKEN_SECRET,(err,decoded)=>{
-        if(err){
-            return res.status(401).send({message:"unauthorized user"})
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        if (err) {
+            return res.status(401).send({ message: "unauthorized user" })
         }
         // console.log("real decoded toke", decoded);
         req.user = decoded
         next()
     })
-    
+
 }
 
 async function run() {
@@ -64,41 +71,45 @@ async function run() {
             const user = req.body;
             console.log(user);
             // const result = await jobscollection.insertOne(addedjobs)
-            const token = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET, {expiresIn: "1h"})
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1h" })
 
-            res.cookie("token", token , {
+            res.cookie("token", token, {
                 httpOnly: true,
-                secure:true,
-                sameSite:"none",
-                maxAge:60*60*1000
-                
+                // secure: true,
+                // sameSite: "none",
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+                // maxAge: 60 * 60 * 1000
+
 
             })
-            
-            .send({success: true})
+
+                .send({ success: true })
 
 
         })
         // logoit api
         app.post("/api/v1/jwt/logout", async (req, res) => {
             const user = req.body;
-            console.log("logoyt",user);
+            console.log("logoyt", user);
             // const result = await jobscollection.insertOne(addedjobs)
-            
 
-            res.clearCookie("token",  {
-               maxAge:0
-                
+
+            res.clearCookie("token", {
+                maxAge: 0,
+                secure: process.env.NODE_ENV === "production" ? true : false,
+                sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+
 
             })
-            
-            .send({success: true})
+
+                .send({ success: true })
 
 
         })
 
 
-    //    services api
+        //    services api
 
         // [pst api for add product]
 
@@ -115,8 +126,8 @@ async function run() {
         app.get("/api/v2/getAddedJobsData", async (req, res) => {
             // console.log(req.query.email);
             let query = {}
-            if(req?.query?.email){
-                query = {email: req?.query?.email}
+            if (req?.query?.email) {
+                query = { email: req?.query?.email }
             }
             // console.log("tok tok",req.cookies.token);
             const cursor = jobscollection.find(query)
@@ -126,18 +137,19 @@ async function run() {
         })
 
         // get api to get addedjobs to postedjob route data
+        //veryfyToken,
 
-        app.get("/api/v1/getAddedJobsData",veryfyToken, async (req, res) => {
-            console.log(  "query email", req.query.email);
+        app.get("/api/v1/getAddedJobsData", veryfyToken, async (req, res) => {
+            console.log("query email", req.query.email);
             console.log("token query", req?.user?.email);
             // if(req?.query?.email !== req?.user?.email){
             //     return res.status(401).send({message:"forbidden access"})
             // }
             let query = {}
-            if(req?.query?.email){
-                query = {email: req?.query?.email}
+            if (req?.query?.email) {
+                query = { email: req?.query?.email }
             }
-            console.log("tok tok user",req.user);
+            console.log("tok tok user", req.user);
             const cursor = jobscollection.find(query)
             const result = await cursor.toArray()
             res.send(result)
@@ -156,12 +168,13 @@ async function run() {
         })
 
         // get api to get all bidded data by query this
+        //veryfyToken,
 
-        app.get("/api/v1/employ/getAllBiddedJobs",veryfyToken, async (req, res) => {
-            console.log("bijidde email",req.query?.email);
+        app.get("/api/v1/employ/getAllBiddedJobs", veryfyToken, async (req, res) => {
+            console.log("bijidde email", req.query?.email);
             let query = {}
-            if(req?.query?.email){
-                query = {bidder_email: req?.query?.email}
+            if (req?.query?.email) {
+                query = { bidder_email: req?.query?.email }
             }
             const cursor = allBiddedJobs.find(query)
             const result = await cursor.toArray()
@@ -169,12 +182,13 @@ async function run() {
 
         })
         // get api to get all bidded data by all this2
+        //veryfyToken,
 
-        app.get("/api/v3/employ/getAllBiddedJobs",veryfyToken, async (req, res) => {
-            console.log("bijidde email",req.query?.email);
+        app.get("/api/v3/employ/getAllBiddedJobs", veryfyToken, async (req, res) => {
+            console.log("bijidde email", req.query?.email);
             let query = {}
-            if(req?.query?.email){
-                query = {Buyer_email: req?.query?.email}
+            if (req?.query?.email) {
+                query = { Buyer_email: req?.query?.email }
             }
             const cursor = allBiddedJobs.find(query)
             const result = await cursor.toArray()
@@ -184,15 +198,15 @@ async function run() {
         // get api to get all bidded data for bidder email and buyer email get
 
         app.get("/api/v4/employ/getAlladdedJobs", async (req, res) => {
-            console.log("bijidde email",req.query?.email);
+            console.log("bijidde email", req.query?.email);
             // let query = {}
             // if(req?.query?.email){
             //     query = {bidder_email: req?.query?.email}
             // }
-            const projection ={
+            const projection = {
                 email: 1,
-                
-                
+
+
 
             }
             const cursor = jobscollection.find().project(projection)
@@ -264,7 +278,7 @@ async function run() {
         app.delete("/api/v1/employ/deleteJobsCard/:id", async (req, res) => {
             const id = req.params.id
             // console.log("pls delte ", id)
-            const query = { _id: new  ObjectId(id) }
+            const query = { _id: new ObjectId(id) }
             const result = await jobscollection.deleteOne(query)
             res.send(result)
         })
