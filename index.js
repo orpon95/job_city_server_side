@@ -89,7 +89,7 @@ async function run() {
 
 
         })
-        // logoit api
+        // logout api
         app.post("/api/v1/jwt/logout", async (req, res) => {
             const user = req.body;
             console.log("logoyt", user);
