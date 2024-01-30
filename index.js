@@ -13,11 +13,12 @@ const port = process.env.PORT || 5000;
 app.use(cors({
     origin: [
 
-        // "http://localhost:5173",
+        "http://localhost:5173",
         "https://job-city-b516d.web.app",
         "job-city-b516d.firebaseapp.com",
         "https://job-city-b516d.firebaseapp.com",
-        "https://654ccfa2ddff4238596ed626--gorgeous-blini-aab416.netlify.app/"
+        "https://654ccfa2ddff4238596ed626--gorgeous-blini-aab416.netlify.app",
+        "https://job-city.netlify.app"
     ]
     ,
     credentials: true
@@ -211,6 +212,16 @@ async function run() {
 
             }
             const cursor = jobscollection.find().project(projection)
+            const result = await cursor.toArray()
+            res.send(result)
+
+        })
+
+        // get api for all bidded jobs 
+
+        app.get("/api/v6/employ/getAllBiddedJobs", async (req, res) => {
+           
+            const cursor = allBiddedJobs.find()
             const result = await cursor.toArray()
             res.send(result)
 
